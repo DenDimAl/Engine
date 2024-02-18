@@ -1,22 +1,13 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <string>
+#include "ComponentSystem.h"
 
 void Resize(sf::RenderWindow& wind, sf::View& v) {
     float aspect = (float(wind.getSize().x) / float(wind.getSize().y));
     v.setSize(wind.getSize().y*aspect, wind.getSize().y);
 }
 
-class Cell {
-
-};
-
-class Scene {
-
-};
-
-class Player {
-
-};
 
 int main()
 {
@@ -25,13 +16,17 @@ int main()
     
     sf::Font f;
     f.loadFromFile("C:/Windows/Fonts/Tahoma.ttf");
-   
+    sf::Texture t;
+    t.loadFromFile("D:/Не открывать/ебать.png");
+    
     shape.setFillColor(sf::Color::Green);
     sf::RectangleShape W(sf::Vector2f(1500, 800));
     W.setFillColor(sf::Color::White);
     sf::View v1(sf::Vector2f(0.f,0.f), sf::Vector2f(800.f,600.f));
+   
     v1.setCenter(0.f, 0.f);
     v1.setSize(1800.f, 1500.f);
+    SpriteComponent* s = new SpriteComponent(&shape, &t);
     while (window.isOpen())
     {
         sf::Event event;
@@ -72,7 +67,7 @@ int main()
 
         window.clear();
         window.draw(W);
-        window.draw(shape);
+        s->update(window);
         window.setView(v1);
         window.display();
     }
