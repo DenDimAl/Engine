@@ -54,52 +54,53 @@ private:
 
 };
 
-class Cell {
-public:
-	Cell() {
-
-	}
-	~Cell() {};
-	Cell(std::vector <GameObject> o) {
-		objects = o;
-	}
-	void update() {
-		for (int i = 0; i < objects.size(); i++)
-			objects[i].update();
-	}
-private:
-	std::vector <GameObject> objects;
-
-};
+//class Cell {
+//public:
+//	Cell() {
+//
+//	}
+//	~Cell() {};
+//	Cell(std::vector <GameObject> o) {
+//		objects = o;
+//	}
+//	void update() {
+//		for (int i = 0; i < objects.size(); i++)
+//			objects[i].update();
+//	}
+//private:
+//	std::vector <GameObject> objects;
+//
+//};
 
 class Scene {
 
 };
 
-class GameObject
-{
-public:
-	GameObject() {
-		ID = 0;
-	};
-	~GameObject() {};
-	GameObject(std::vector <Component> v, unsigned int id) {
-		components = v;
-		ID = id;
-	}
-	void AddComponent(Component c) {
-		components.push_back(c);
-	}
-	void RemoveComponent(Component c) {
-		
-	}
-	void update() {
-		for (int i = 0; i < components.size(); i++) {
-			components[i].update();
-		}
-	}
-private:
-	unsigned int ID;
-	std::vector<Component> components;
-};
+//class GameObject
+//{
+//public:
+//	GameObject() {
+//		ID = 0;
+//		components = {};
+//	};
+//	~GameObject() {};
+//	GameObject(std::vector <Component> v, unsigned int id) {
+//		components = v;
+//		ID = id;
+//	}
+//	void AddComponent(Component c) {
+//		components.push_back(c);
+//	}
+//	void RemoveComponent(Component c) {
+//		
+//	}
+//	void update() {
+//		for (int i = 0; i < components.size(); i++) {
+//			components[i].update();
+//		}
+//	}
+//private:
+//	unsigned int ID;
+//	std::vector<Component> components;
+//};
 

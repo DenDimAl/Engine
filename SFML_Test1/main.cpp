@@ -17,7 +17,7 @@ int main()
     sf::Font f;
     f.loadFromFile("C:/Windows/Fonts/Tahoma.ttf");
     sf::Texture t;
-    t.loadFromFile("D:/Не открывать/ебать.png");
+    t.loadFromFile("textura.png");
     
     shape.setFillColor(sf::Color::Green);
     sf::RectangleShape W(sf::Vector2f(1500, 800));
