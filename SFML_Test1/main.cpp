@@ -16,6 +16,10 @@ int main()
     sf::Event event;
     sf::RenderWindow window(sf::VideoMode(1200, 900), "DA");
     sf::CircleShape shape(40.f);
+    sf::RectangleShape wall1(sf::Vector2f(80.f,80.f));
+    sf::RectangleShape wall2(sf::Vector2f(80.f, 80.f));
+    wall1.setFillColor(sf::Color::Red);
+    wall2.setFillColor(sf::Color::Red);
     sf::Font f;
     f.loadFromFile("C:/Windows/Fonts/Tahoma.ttf");
     sf::Texture t;
@@ -30,10 +34,22 @@ int main()
     v1.setSize(1800.f, 1500.f);
     SpriteComponent s(&shape, &t,&window);
     GameObject o;
+    GameObject w1;
+    GameObject w2;
+    SpriteComponent sw1(&wall1,&window);
+    SpriteComponent sw2(&wall2,&window);
+    Transform tw1(sw1);
+    Transform tw2(sw2);
+    tw1.SetCoords(0.f, 150.f);
+    tw2.SetCoords(150.f, 150.f);
+    w1.AddComponent(&sw1);
+    w1.AddComponent(&tw1);
+    w2.AddComponent(&sw2);
+    w2.AddComponent(&tw2);
     Transform tra(s);
     o.AddComponent(&s);
     o.AddComponent(&tra);
-    PlayerControllerComponent P(o);
+    PlayerControllerComponent P(o,sf::Keyboard::T, sf::Keyboard::F, sf::Keyboard::G, sf::Keyboard::H);
     P.SetEvent(&event);
     o.AddComponent(&P);
     while (window.isOpen())
@@ -51,7 +67,8 @@ int main()
 
         window.clear();
         window.draw(W);
-       
+        w1.update();
+        w2.update();
         o.update();
         window.setView(v1);
         window.display();
