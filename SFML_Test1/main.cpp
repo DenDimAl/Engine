@@ -3,6 +3,8 @@
 #include <string>
 #include "ComponentSystem.h"
 
+
+
 void Resize(sf::RenderWindow& wind, sf::View& v) {
     float aspect = (float(wind.getSize().x) / float(wind.getSize().y));
     v.setSize(wind.getSize().y*aspect, wind.getSize().y);
@@ -11,9 +13,9 @@ void Resize(sf::RenderWindow& wind, sf::View& v) {
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(1200, 900), "SFML works!");
+    sf::Event event;
+    sf::RenderWindow window(sf::VideoMode(1200, 900), "DA");
     sf::CircleShape shape(40.f);
-    
     sf::Font f;
     f.loadFromFile("C:/Windows/Fonts/Tahoma.ttf");
     sf::Texture t;
@@ -26,40 +28,22 @@ int main()
    
     v1.setCenter(0.f, 0.f);
     v1.setSize(1800.f, 1500.f);
-    SpriteComponent* s = new SpriteComponent(&shape, &t);
+    SpriteComponent s(&shape, &t,&window);
+    GameObject o;
+    Transform tra(s);
+    o.AddComponent(&s);
+    o.AddComponent(&tra);
+    PlayerControllerComponent P(o);
+    P.SetEvent(&event);
+    o.AddComponent(&P);
     while (window.isOpen())
     {
-        sf::Event event;
+        
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
                 window.close();
-            if (event.type == event.KeyPressed) {
-                if (event.key.code == sf::Keyboard::Right) {
-                    v1.move(10.f, 0.f);
-                }
-                if (event.key.code == sf::Keyboard::Left) {
-                    v1.move(-10.f, 0.f);
-                }
-                if (event.key.code == sf::Keyboard::Up) {
-                    v1.move(0.f, -10.f);
-                }
-                if (event.key.code == sf::Keyboard::Down) {
-                    v1.move(0.f, 10.f);
-                }
-                if (event.key.code == sf::Keyboard::D) {
-                    shape.move(60.f, 0.f);
-                }
-                if (event.key.code == sf::Keyboard::A) {
-                    shape.move(-60.f, 0.f);
-                }
-                if (event.key.code == sf::Keyboard::W) {
-                    shape.move(0.f, -60.f);
-                }
-                if (event.key.code == sf::Keyboard::S) {
-                    shape.move(0.f, 60.f);
-                }
-            }
+            P.update();
             if (event.type == event.Resized) {
                 Resize(window, v1);
             }
@@ -67,7 +51,8 @@ int main()
 
         window.clear();
         window.draw(W);
-        s->update(window);
+       
+        o.update();
         window.setView(v1);
         window.display();
     }
