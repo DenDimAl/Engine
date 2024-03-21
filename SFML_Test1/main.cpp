@@ -32,26 +32,42 @@ int main()
    
     v1.setCenter(0.f, 0.f);
     v1.setSize(1800.f, 1500.f);
-    SpriteComponent s(&shape, &t,&window);
+    SpriteComponent s;
+    Transform tra;
     GameObject o;
+    PlayerControllerComponent P;
+    o.AddComponent<SpriteComponent>(&s);
+    s.Initialize(&shape, &t, &window);
+    o.AddComponent<Transform>(&tra);
+    tra.Initialize(s);
+    o.AddComponent(&P);
+    P.Initialize(o, sf::Keyboard::W, sf::Keyboard::A, sf::Keyboard::S, sf::Keyboard::D);
+    P.SetEvent(&event);
+
     GameObject w1;
     GameObject w2;
-    SpriteComponent sw1(&wall1,&window);
-    SpriteComponent sw2(&wall2,&window);
-    Transform tw1(sw1);
-    Transform tw2(sw2);
+    SpriteComponent sw1;
+    SpriteComponent sw2;
+    Transform tw1;
+    Transform tw2;
+    w1.AddComponent<SpriteComponent>(&sw1);
+    w1.AddComponent<Transform>(&tw1);
+    w2.AddComponent<SpriteComponent>(&sw2);
+    w2.AddComponent<Transform>(&tw2);
+    sw1.Initialize(&wall1, &window);
+    sw2.Initialize(&wall2, &window);
+    tw1.Initialize(sw1);
+    tw2.Initialize(sw2);
     tw1.SetCoords(0.f, 150.f);
     tw2.SetCoords(150.f, 150.f);
-    w1.AddComponent(&sw1);
-    w1.AddComponent(&tw1);
-    w2.AddComponent(&sw2);
-    w2.AddComponent(&tw2);
-    Transform tra(s);
-    o.AddComponent(&s);
-    o.AddComponent(&tra);
-    PlayerControllerComponent P(o,sf::Keyboard::T, sf::Keyboard::F, sf::Keyboard::G, sf::Keyboard::H);
-    P.SetEvent(&event);
-    o.AddComponent(&P);
+    
+    
+   
+    
+    
+    
+   
+    
     while (window.isOpen())
     {
         
@@ -59,7 +75,7 @@ int main()
         {
             if (event.type == sf::Event::Closed)
                 window.close();
-            P.update();
+            P.Update();
             if (event.type == event.Resized) {
                 Resize(window, v1);
             }
@@ -67,9 +83,9 @@ int main()
 
         window.clear();
         window.draw(W);
-        w1.update();
-        w2.update();
-        o.update();
+        w1.Update();
+        w2.Update();
+        o.Update();
         window.setView(v1);
         window.display();
     }

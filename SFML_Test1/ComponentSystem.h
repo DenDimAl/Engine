@@ -3,46 +3,43 @@
 #include <vector>
 #include <typeindex>
 #include <typeinfo>
-
-
+#include <unordered_map>
+#define Type(x) std::type_index(typeid(x))
 class Component {
 public:
 	Component() {
 
 	}
-	virtual void update() {
+	virtual void Update() {
 
 	}
-	unsigned int Get_Id(){
-		return ID;
-	}
+	
 protected:
-	unsigned int ID=0;
+	
 };
 
 class SpriteComponent : public Component
 {
 public:
-	SpriteComponent(sf::Shape* s, sf::Texture* t, sf::RenderWindow* w) { 
+	SpriteComponent() {
+
+	}
+	void Initialize(sf::Shape* s, sf::Texture* t, sf::RenderWindow* w) {
 		shape = s;
 		window = w;
 		(*shape).setTexture(t);
-		ID = 1;
 	}
-	SpriteComponent(sf::Shape* s, sf::RenderWindow* w) {
-		window = w;
+	void Initialize(sf::Shape* s, sf::RenderWindow* w) {
 		shape = s;
-		ID = 1;
+		window = w;
 	}
-	void update() {
+	void Update() {
 		(*window).draw(*shape);
 	}
 	sf::Shape* GetShape() {
 		return shape;
 	}
-	unsigned int Get_Id() {
-		return ID;
-	}
+	
 private:
 	sf::RenderWindow* window;
 	sf::Shape* shape;
@@ -54,26 +51,29 @@ private:
 class Transform : public Component {
 public:
 	Transform(){
+		
+	}
+	void Initialize() {
 		coords.x = 0;
 		coords.y = 0;
 		(*s).setPosition(0.f, 0.f);
-		ID = 2;
 	}
-	Transform(float a, float b) {
+	void Initialize(float a, float b) {
 		coords.x = a;
 		coords.y = b;
 		(*s).setPosition(coords);
-		ID = 2;
 	}
 	
-	Transform(SpriteComponent sprite) {
+	void Initialize(SpriteComponent sprite) {
 		coords.x = (*sprite.GetShape()).getPosition().x;
 		coords.y = (*sprite.GetShape()).getPosition().y;
 		s = sprite.GetShape();
 		(*s).setOrigin((*s).getGlobalBounds().width / 2, (*s).getGlobalBounds().height / 2);
-		ID = 2;
+		
 	}
-	sf::Vector2f Get_coords() {
+	
+
+	sf::Vector2f GetCoords() {
 		return coords;
 	}
 	void SetCoords(float X, float Y) {
@@ -82,12 +82,10 @@ public:
 		(*s).setPosition(coords);
 	}
 	void Translate(float Tx, float Ty) {
-		(*s).move(Tx, -Ty); //функции SFML
+		(*s).move(Tx, -Ty); 
 	}
 	void Rotate(float theta) {
-		
 		(*s).rotate(theta);
-	
 	}
 	void Scale(float Sx, float Sy) {
 		(*s).scale(sf::Vector2f(Sx, Sy));
@@ -95,13 +93,11 @@ public:
 	void Scale(float S) {
 		(*s).scale(sf::Vector2f(S, S));
 	}
-	void update() {
+	void Update() {
 		coords.x = (*s).getPosition().x;
 		coords.y = (*s).getPosition().y;
 	}
-	unsigned int Get_Id() {
-		return ID;
-	}
+	
 private:
 	sf::Vector2f coords;
 	sf::Shape* s;
@@ -112,33 +108,36 @@ private:
 class GameObject
 {
 public:
-	std::vector<Component*> components;
+	std::unordered_map<std::type_index, Component*> components;
 	GameObject() {
-		
 		components = {};
 	};
 	~GameObject() {};
-	GameObject(std::vector <Component*> v, unsigned int id) {
+	GameObject(std::unordered_map<std::type_index, Component*> v) {
 		components = v;
-		ID = id;
+		
 	}
-	void AddComponent(Component* c) {
-		components.push_back(c);
-	}
-	void RemoveComponent(Component* c) {
+	template <typename T>
+	T* GetComponent() {
+		T* c;
 		for (auto it = components.begin(); it != components.end(); it++) {
-			if (*it == c) {
-				components.erase(it);
+			if (c=dynamic_cast<T*>(it->second)) {
+				return c;
 			}
 		}
-	  
+		return nullptr;
 	}
-	
-	void update() {
-		for (int i = 0; i < components.size(); i++) {
-			(*components[i]).update();
+	void Update() {
+		for (auto i = components.begin(); i != components.end(); i++) {
+			i->second->Update();
 		}
 	}
+	template <typename T>
+	T* AddComponent(T* c) {
+		components.insert(std::make_pair(Type(T), c));
+		return c;
+	}
+	
 	
 private:
 	unsigned int ID;
@@ -147,39 +146,19 @@ private:
 class PlayerControllerComponent : public Component
 {
 public:
-	PlayerControllerComponent() {
-		ID = 3;
-	}
-	PlayerControllerComponent(GameObject GO,sf::Keyboard::Key Up, sf::Keyboard::Key Left, sf::Keyboard::Key Down, sf::Keyboard::Key Right) {
+	PlayerControllerComponent(){}
+	void Initialize(GameObject GO,sf::Keyboard::Key Up, sf::Keyboard::Key Left, sf::Keyboard::Key Down, sf::Keyboard::Key Right) {
 		MoveUp = Up;
 		MoveLeft = Left;
 		MoveDown = Down;
 		MoveRight = Right;
-		Shoot = sf::Mouse::Left;
-		Check = sf::Mouse::Right;
-		for (int i = 0; i < GO.components.size(); i++) {
-			if (GO.components[i]->Get_Id() == 2) {
-				tr = dynamic_cast<Transform*>(GO.components[i]);
-				break;
-			}
-		}
-		ID = 3;
+		tr=GO.GetComponent<Transform>();
 	}
-	PlayerControllerComponent(GameObject GO) {
-		
-		for (int i = 0; i < GO.components.size(); i++) {
-			Transform* t;
-			if (GO.components[i]->Get_Id()==2) {
-				tr = dynamic_cast<Transform*>(GO.components[i]);//!
-				break;
-			}
-		}
-		ID = 3;
-	}
+
 	void SetEvent(sf::Event* e) {
 		ev = e;
 	}
-	void update() {
+	void Update() {
 		
 		if ((*ev).type == (*ev).KeyPressed) {
 			if ((*ev).key.code == MoveUp) {
@@ -226,9 +205,9 @@ public:
 	Cell(std::vector <GameObject> o) {
 		objects = o;
 	}
-	void update() {
+	void Update() {
 		for (int i = 0; i < objects.size(); i++)
-			objects[i].update();
+			objects[i].Update();
 	}
 private:
 	std::vector <GameObject> objects;
@@ -242,29 +221,29 @@ class CameraComponent : public Component
 {
 public:
 	CameraComponent() {
-		ID = 4;
+		
 	};
-	CameraComponent(Scene s) {
-
-	}
-	CameraComponent(Transform t) {
-		camera.setCenter(t.Get_coords());
+	
+	void Initialize(Transform t) {
+		camera.setCenter(t.GetCoords());
 		camera.setSize(800, 600);
 
 	}
-	CameraComponent(Transform t,float SizeX, float SizeY) {
-		camera.setCenter(t.Get_coords());
+	void Initialize(Transform t,float SizeX, float SizeY) {
+		camera.setCenter(t.GetCoords());
 		camera.setSize(SizeX, SizeY);
 
 	}
-	CameraComponent(float CenterX,float CenterY,float SizeX, float SizeY) {
+	void Initialize(float CenterX,float CenterY,float SizeX, float SizeY) {
 		camera.setCenter(CenterX,CenterY);
 		camera.setSize(SizeX,SizeY);
-
 	}
-	~CameraComponent() {};
-	void SetCenter() {
-
+	
+	void SetCenter(float X, float Y) {
+		camera.setCenter(X, Y);
+	}
+	void SetScale(float sizeX, float sizeY) {
+		camera.setSize(sizeX, sizeY);
 	}
 private:
 	sf::View camera;
